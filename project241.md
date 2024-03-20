@@ -51,6 +51,7 @@ public class project241 {
 				catch (InputMismatchException e) {
 			        System.out.println("Invalid input. Please ensure that a valid integer between 1-10 are entered for the job rating!");
 			        scnr.nextLine(); //eats the invalid input
+			        isValid = false;
 				}
 				
 				//exception for out of bounds
@@ -59,10 +60,15 @@ public class project241 {
 					scnr.nextLine(); //eats the invalid input
 				}
 				
-			}while(!isValid);
+				
+				
+			}while(!isValid); // make sure it is valid before exiting
 			
 			//put values in the array of objects
 			Employee[i] = new EmployeeInfo(employeeName, employeeEmail, employeeID, employeeRating);
+			
+			// print data to file after each employee entry
+			Employee[i].printToFile();
 		}
 		
 		
