@@ -1,79 +1,135 @@
-// CSC-241-Final-Project 
-import java.util.*;
+import java.io.*;
+import java.util.Scanner;
 
 /*
 * Author: Eli Ledford, Murtazza and Venessa
-* Date: 03/12/2024
-* Purpose: 
+* Date: 04/15/2024
+* Purpose: To read in a file of employees and then sort it a chose which rated employees you would like to see 
 */
+
 public class project241 {
-	public static void main(String[] args) {
-		//declare scanner object
-		Scanner scnr = new Scanner(System.in);
-		
-		//declare object
-		EmployeeInfo[] Employee = new EmployeeInfo[3]; 
-		
-		//declare variables
-		String employeeEmail;
-		String employeeID;
-		String employeeName;
-		int employeeRating = 0;
-		boolean isValid;
-		
-		//for loop to loop to input input
-		for(int i = 0;i < 3;i++) {
-			isValid = false;
-			System.out.println("What is the name of employee " + (i+1) + "?");
-			employeeName = scnr.nextLine();
-			System.out.println("What is " + employeeName + "'s ID?");
-			employeeID = scnr.nextLine();
-			System.out.println("What is " + employeeName + "'s email address?");
-			employeeEmail = scnr.nextLine();
-			//do-while loop until rating it entered right
-			do{
-				//exception for data validation
-				try{
-					System.out.println("What is " + employeeName + "'s job rating? (1-10)");
-					employeeRating = scnr.nextInt();
-					//out of bounds
-					if(employeeRating <= 0 || employeeRating > 10) {
-						isValid = false;
-						throw new Exception("Exception, out of range");
-					}
-					//is valid and in range
-					else {
-						isValid = true;
-					}
-					
-				}
-				//exception for wrong data type
-				catch (InputMismatchException e) {
-			        System.out.println("Invalid input. Please ensure that a valid integer between 1-10 are entered for the job rating!");
-			        scnr.nextLine(); //eats the invalid input
-			        isValid = false;
-				}
-				
-				//exception for out of bounds
-				catch (Exception e) {
-					System.out.println(e.getMessage() + ". Please make sure you enter the rating on a scale of 1 - 10!");
-					scnr.nextLine(); //eats the invalid input
-				}
-				
-				
-				
-			}while(!isValid); // make sure it is valid before exiting
-			
-			//put values in the array of objects
-			Employee[i] = new EmployeeInfo(employeeName, employeeEmail, employeeID, employeeRating);
-			
-			// print data to file after each employee entry
-			Employee[i].printToFile();
-		}
-		
-		
-		
-		
-		
-	}
+	
+	/**\
+	 * Author: Eli, Murtazza, Venessa
+	 * Purpose: Recursive merge sort
+	 * @param arr - the array of student
+	 * @param left - most left array object
+	 * @param right - most right array object
+	 */
+	public static void mergeSort(SortedEmployeeInfo[] arr, int left, int right) {
+        if (left < right) {
+            // Find the middle point
+            int mid = (left + right) / 2;
+
+            // Sort first and second halves recursively
+            mergeSort(arr, left, mid);
+            mergeSort(arr, mid + 1, right);
+
+            // Merge the sorted halves
+            merge(arr, left, mid, right);
+        }
+    }
+
+    /**
+     * Author: Eli, Murtazza, Venessa
+     * Purpose: Merge two subarrays of arr[]
+     * @param arr - array used in sorting
+     * @param left - most left array of the objects
+     * @param mid - middle object of the array
+     * @param right - msot right object of the array
+     */
+    public static void merge(SortedEmployeeInfo[] arr, int left, int mid, int right) {
+        // Sizes of two subarrays to be merged
+        int n1 = mid - left + 1;
+        int n2 = right - mid;
+
+        // Create temporary arrays
+        SortedEmployeeInfo[] L = new SortedEmployeeInfo[n1];
+        SortedEmployeeInfo[] R = new SortedEmployeeInfo[n2];
+
+        // Copy data to temporary arrays L[] and R[]
+        for (int i = 0; i < n1; i++) {
+            L[i] = arr[left + i];
+        }
+        for (int j = 0; j < n2; j++) {
+            R[j] = arr[mid + 1 + j];
+        }
+
+        // Merge the temporary arrays
+        int i = 0, j = 0;
+        int k = left; // Initial index of merged subarray
+        while (i < n1 && j < n2) {
+            if (L[i].getRating() <= R[j].getRating()) {
+                arr[k] = L[i];
+                i++;
+            } else {
+                arr[k] = R[j];
+                j++;
+            }
+            k++;
+        }
+
+        // Copy remaining elements of L[] and R[] if any
+        while (i < n1) {
+            arr[k] = L[i];
+            i++;
+            k++;
+        }
+        while (j < n2) {
+            arr[k] = R[j];
+            j++;
+            k++;
+        }
+    }
+	
+    //main starting point of the program
+    public static void main(String[] args) {
+        // Declare scanner object for file input
+        Scanner fileScanner = null;
+        //make sure the file is found and read in correctly
+        try {
+            fileScanner = new Scanner(new File("Employees.txt"));
+        } 
+        catch (FileNotFoundException e) {
+            System.out.println("File not found: Employees.txt");
+        }
+
+        // Declare array of EmployeeInfo objects
+        SortedEmployeeInfo[] employees = new SortedEmployeeInfo[100];
+
+        // Declare variables
+        String employeeEmail;
+        int employeeID;
+        String employeeName;
+        int employeeRating;
+
+        // Loop to read input from the file
+        for (int i = 0; i < 100; i++) {
+            // Read employee details from the file
+            employeeName = fileScanner.nextLine();
+            employeeID = fileScanner.nextInt();
+            fileScanner.nextLine(); // Consume the newline character after reading the int
+            employeeEmail = fileScanner.nextLine();
+            employeeRating = fileScanner.nextInt();
+            fileScanner.nextLine(); // Consume the newline character after reading the int
+
+            // Store values in the array of objects
+            employees[i] = new SortedEmployeeInfo(employeeName, employeeEmail, employeeID, employeeRating);
+
+            
+        }
+        
+        // Sort employees based on ratings using recursive merge sort
+        mergeSort(employees, 0, employees.length - 1);
+        
+        
+        //prints the sorted employee array into the file
+        for (SortedEmployeeInfo employee : employees) {
+        	//calls the corresponding employee to print
+        	employee.printSortedEmployeesToFile();// Print sorted employees
+        }
+
+        // Close the file scanner
+        fileScanner.close();
+    }
 }
